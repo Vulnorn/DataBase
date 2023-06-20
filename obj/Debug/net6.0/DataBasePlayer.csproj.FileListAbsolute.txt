@@ -1,0 +1,15 @@
+C:\Users\1\Documents\GitHub\DataBase\bin\Debug\net6.0\DataBasePlayer.exe
+C:\Users\1\Documents\GitHub\DataBase\bin\Debug\net6.0\DataBasePlayer.deps.json
+C:\Users\1\Documents\GitHub\DataBase\bin\Debug\net6.0\DataBasePlayer.runtimeconfig.json
+C:\Users\1\Documents\GitHub\DataBase\bin\Debug\net6.0\DataBasePlayer.dll
+C:\Users\1\Documents\GitHub\DataBase\bin\Debug\net6.0\DataBasePlayer.pdb
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.csproj.AssemblyReference.cache
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.AssemblyInfoInputs.cache
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.AssemblyInfo.cs
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.csproj.CoreCompileInputs.cache
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.dll
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\refint\DataBasePlayer.dll
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.pdb
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\DataBasePlayer.genruntimeconfig.cache
+C:\Users\1\Documents\GitHub\DataBase\obj\Debug\net6.0\ref\DataBasePlayer.dll

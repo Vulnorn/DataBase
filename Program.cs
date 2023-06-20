@@ -1,9 +1,5 @@
-﻿//Реализовать базу данных игроков и методы для работы с ней.
-//У игрока может быть уникальный номер, ник, уровень, флаг – забанен ли он(флаг - bool).
-//Реализовать возможность добавления игрока, бана игрока по уникальный номеру, разбана игрока по уникальный номеру и удаление игрока.
-//Создание самой БД не требуется, задание выполняется инструментами, 
-//которые вы уже изучили в рамках курса. Но нужен класс, который содержит игроков и её можно назвать "База данных".
-using System;
+﻿using System;
+using System.Threading.Channels;
 
 namespace DataBasePlayer
 {
@@ -11,84 +7,209 @@ namespace DataBasePlayer
     {
         static void Main(string[] args)
         {
+            const string AddNewPlayerMenu = "1";
+            const string ShowPlayerMenu = "2";
+            const string BanPlayerMenu = "3";
+            const string UnbanPlayerMenu = "4";
+            const string RemovePlayerMenu = "5";
+            const string ExitMenu = "6";
 
-        }
-    }
+            bool isWork = true;
 
-    class DataBase
-    {
-        private List<Player> _dataBases = new List<Player>();
+            Database database = new Database();
 
-        public void CreateNewPlayer(Player player)
-        {
-            string userInputNamePlayer = "";
-            int userInputLevelPlayer;
-            int minimumLengthNamePlayer = 1;
-            int minimumLevelPlayer = 1;
-            int maximumLevelPlayer = 100;
-
-            Console.Clear();
-            Console.WriteLine($"Введите ник персонажа");
-            userInputNamePlayer = Console.ReadLine();
-
-            while (userInputNamePlayer.Length < minimumLengthNamePlayer)
+            while (isWork)
             {
                 Console.Clear();
-                Console.Write("Поле логина не может быть пустым. Введите ник персонажа: ");
-                userInputNamePlayer = Console.ReadLine();
-            }
+                Console.WriteLine($"Выберите пункт в меню:");
+                Console.WriteLine($"{AddNewPlayerMenu} - Добавить нового игрока.");
+                Console.WriteLine($"{ShowPlayerMenu} - Показать базу с игроками.");
+                Console.WriteLine($"{BanPlayerMenu} - Забанить игрока.");
+                Console.WriteLine($"{UnbanPlayerMenu} - Разбанить игрока.");
+                Console.WriteLine($"{RemovePlayerMenu} - Удалить игрока.");
+                Console.WriteLine($"{ExitMenu} - Выход");
 
-            Console.Clear();
-            Console.WriteLine($"Введите уровень персонажа. Он не должен быть ниже {minimumLevelPlayer} и {minimumLevelPlayer}");
-            userInputLevelPlayer = Convert.ToInt32(Console.ReadLine());
+                string userInput = Console.ReadLine();
 
-            while (userInputLevelPlayer < minimumLevelPlayer || userInputLevelPlayer > maximumLevelPlayer)
-            {
-                Console.Clear();
-                Console.Write($"Уровень персонажа не может быть ниже {minimumLevelPlayer} и выше {maximumLevelPlayer}. Введите уровень персонажа: ");
-                userInputLevelPlayer = Convert.ToInt32(Console.ReadLine());
-            }
-
-            _dataBases.Add(new Player(userInputNamePlayer, userInputLevelPlayer));
-        }
-
-        public void ShowPlayer(Player player)
-        {
-            if (_dataBases.Count < 1)
-                Console.WriteLine($"База данных пуста. Добавьте Игроков");
-            else
-            {
-                for (int i = 0; i < _dataBases.Count; i++)
+                switch (userInput)
                 {
-                    Console.WriteLine(_dataBases[i]);
+                    case AddNewPlayerMenu:
+                        database.CreateNewPlayer();
+                        break;
+
+                    case ShowPlayerMenu:
+                        database.ShowPlayer();
+                        break;
+
+                    case BanPlayerMenu:
+                        database.SetBanPlayer();
+                        break;
+
+                    case UnbanPlayerMenu:
+                        database.UnbanPlayer();
+                        break;
+
+                    case RemovePlayerMenu:
+                        database.RemovePlayer();
+                        break;
+
+                    case ExitMenu:
+                        isWork = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Ошибка ввода команды.");
+                        Console.ReadKey();
+                        break;
+                }
+            }
+        }
+
+        class Database
+        {
+            List<Player> _dataBases = new List<Player>();
+            public void CreateNewPlayer()
+            {
+                string userInputNamePlayer = "";
+                int userInputLevelPlayer;
+                int minimumLengthNamePlayer = 1;
+                int minimumLevelPlayer = 1;
+                int maximumLevelPlayer = 100;
+
+                Console.Clear();
+                Console.WriteLine($"Введите ник персонажа");
+                userInputNamePlayer = Console.ReadLine();
+
+                while (userInputNamePlayer.Length < minimumLengthNamePlayer)
+                {
+                    Console.Clear();
+                    Console.Write("Поле логина не может быть пустым. Введите ник персонажа: ");
+                    userInputNamePlayer = Console.ReadLine();
+                }
+
+                Console.Clear();
+                Console.WriteLine($"Введите уровень персонажа. Он не должен быть ниже {minimumLevelPlayer} и {maximumLevelPlayer}");
+                userInputLevelPlayer = Convert.ToInt32(Console.ReadLine());
+
+                while (userInputLevelPlayer < minimumLevelPlayer || userInputLevelPlayer > maximumLevelPlayer)
+                {
+                    Console.Clear();
+                    Console.Write($"Уровень персонажа не может быть ниже {minimumLevelPlayer} и выше {maximumLevelPlayer}. Введите уровень персонажа: ");
+                    userInputLevelPlayer = Convert.ToInt32(Console.ReadLine());
+                }
+
+                _dataBases.Add(new Player(userInputNamePlayer, userInputLevelPlayer));
+            }
+
+            public void ShowPlayer()
+            {
+                if (_dataBases.Count < 1)
+                {
+                    Console.WriteLine($"База данных пуста. Добавьте Игроков");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    for (int i = 0; i < _dataBases.Count; i++)
+                    {
+                        _dataBases[i].ShowInfo();
+                    }
+                }
+
+                Console.ReadKey();
+            }
+
+            public void RemovePlayer()
+            {
+                if (TryGetPlayer(out Player player))
+                {
+                    _dataBases.Remove(player);
+                    Console.WriteLine("Игрок с таким ID найден и удален.");
+                    Console.ReadKey();
                 }
             }
 
-            Console.ReadKey();
+            public void SetBanPlayer()
+            {
+                if (TryGetPlayer(out Player player))
+                {
+                    player.SetBan();
+                }
+            }
+
+            public void UnbanPlayer()
+            {
+                if (TryGetPlayer(out Player player))
+                {
+                    player.RemoveBan();
+                }
+            }
+
+            public bool TryGetPlayer(out Player player)
+            {
+                int id;
+                player = null;
+
+                Console.WriteLine("Введите уникальный ID игрока");
+                string userInput = Console.ReadLine().Trim();
+
+                if (int.TryParse(userInput, out id) == false)
+                {
+                    Console.WriteLine("Не корректный ввод.");
+                    Console.ReadKey();
+                    return false;
+                }
+
+                for (int i = 0; i < _dataBases.Count; i++)
+                {
+                    if (id == _dataBases[i].Id)
+                    {
+                        player = _dataBases[i];
+                        return true;
+                    }
+                }
+
+                Console.WriteLine("Нет такого игрока.");
+                Console.ReadKey();
+                return false;
+            }
         }
 
-        public void BanPlayer(Player player)
+        class Player
         {
-            player.Id
+            private static int _ids;
+
+            public Player(string name, int level)
+            {
+                Id = ++_ids;
+                Name = name;
+                Level = level;
+                IsBanned = false;
+            }
+
+            public int Id { get; private set; }
+            public string Name { get; private set; }
+            public int Level { get; private set; }
+            public bool IsBanned { get; private set; }
+
+            public void ShowInfo()
+            {
+                Console.WriteLine($"Уникальный Id Персонажа: {Id} Ник: {Name} Уровень: {Level}{(IsBanned ? " Забанен" : "")}");
+            }
+
+            public void SetBan()
+            {
+                IsBanned = true;
+                Console.WriteLine("Персонаж получил бан.");
+                Console.ReadKey();
+            }
+
+            public void RemoveBan()
+            {
+                IsBanned = false;
+                Console.WriteLine("С Персонажа снят бан.");
+                Console.ReadKey();
+            }
         }
-
-    }
-
-    class Player
-    {
-        private static int _ids;
-
-        public Player(string name, int level)
-        {
-            Id = ++_ids;
-            _name = name;
-            _level = level;
-            _isBan = false;
-        }
-
-        private int Id { get; set; }
-        private string _name { get; set; }
-        private int _level { get; set; }
-        private bool _isBan { get; set; }
     }
 }
