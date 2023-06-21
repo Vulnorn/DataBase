@@ -66,9 +66,10 @@ namespace DataBasePlayer
             }
         }
     }
+
     class Database
     {
-        List<Player> _players = new List<Player>();
+       private List<Player> _players = new List<Player>();
 
         public bool CreateNewPlayer()
         {
