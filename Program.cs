@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Emit;
 using System.Threading.Channels;
 
 namespace DataBasePlayer
@@ -38,7 +39,7 @@ namespace DataBasePlayer
                         break;
 
                     case ShowPlayerMenu:
-                        database.ShowPlayer();
+                        database.ShowAllPlayeres();
                         break;
 
                     case BanPlayerMenu:
@@ -64,152 +65,170 @@ namespace DataBasePlayer
                 }
             }
         }
+    }
+    class Database
+    {
+        List<Player> _players = new List<Player>();
 
-        class Database
+        public bool CreateNewPlayer()
         {
-            List<Player> _dataBases = new List<Player>();
-            public void CreateNewPlayer()
-            {
-                string userInputNamePlayer = "";
-                int userInputLevelPlayer;
-                int minimumLengthNamePlayer = 1;
-                int minimumLevelPlayer = 1;
-                int maximumLevelPlayer = 100;
+            string userInputNamePlayer = "";
+            string userInputLevelPlayer;
+            int minimumLengthNamePlayer = 1;
+            int levelPlayer = 0;
+            int minimumLevelPlayer = 1;
+            int maximumLevelPlayer = 100;
 
+            Console.Clear();
+            Console.WriteLine($"Введите ник персонажа");
+            userInputNamePlayer = Console.ReadLine();
+
+            while (userInputNamePlayer.Length < minimumLengthNamePlayer)
+            {
                 Console.Clear();
-                Console.WriteLine($"Введите ник персонажа");
+                Console.Write("Поле логина не может быть пустым. Введите ник персонажа: ");
                 userInputNamePlayer = Console.ReadLine();
-
-                while (userInputNamePlayer.Length < minimumLengthNamePlayer)
-                {
-                    Console.Clear();
-                    Console.Write("Поле логина не может быть пустым. Введите ник персонажа: ");
-                    userInputNamePlayer = Console.ReadLine();
-                }
-
-                Console.Clear();
-                Console.WriteLine($"Введите уровень персонажа. Он не должен быть ниже {minimumLevelPlayer} и {maximumLevelPlayer}");
-                userInputLevelPlayer = Convert.ToInt32(Console.ReadLine());
-
-                while (userInputLevelPlayer < minimumLevelPlayer || userInputLevelPlayer > maximumLevelPlayer)
-                {
-                    Console.Clear();
-                    Console.Write($"Уровень персонажа не может быть ниже {minimumLevelPlayer} и выше {maximumLevelPlayer}. Введите уровень персонажа: ");
-                    userInputLevelPlayer = Convert.ToInt32(Console.ReadLine());
-                }
-
-                _dataBases.Add(new Player(userInputNamePlayer, userInputLevelPlayer));
             }
 
-            public void ShowPlayer()
-            {
-                if (_dataBases.Count < 1)
-                {
-                    Console.WriteLine($"База данных пуста. Добавьте Игроков");
-                    Console.ReadKey();
-                }
-                else
-                {
-                    for (int i = 0; i < _dataBases.Count; i++)
-                    {
-                        _dataBases[i].ShowInfo();
-                    }
-                }
+            Console.Clear();
+            Console.WriteLine($"Введите уровень персонажа. Он не должен быть ниже {minimumLevelPlayer} и {maximumLevelPlayer}");
+            userInputLevelPlayer = Console.ReadLine();
 
+
+            if (int.TryParse(userInputLevelPlayer, out levelPlayer) == false)
+            {
+                Console.WriteLine("Не корректный ввод.");
                 Console.ReadKey();
+                return false;
             }
 
-            public void RemovePlayer()
+            while (levelPlayer < minimumLevelPlayer || levelPlayer > maximumLevelPlayer)
             {
-                if (TryGetPlayer(out Player player))
-                {
-                    _dataBases.Remove(player);
-                    Console.WriteLine("Игрок с таким ID найден и удален.");
-                    Console.ReadKey();
-                }
-            }
+                Console.Clear();
+                Console.Write($"Уровень персонажа не может быть ниже {minimumLevelPlayer} и выше {maximumLevelPlayer}. Введите уровень персонажа: ");
+                userInputLevelPlayer = Console.ReadLine();
 
-            public void SetBanPlayer()
-            {
-                if (TryGetPlayer(out Player player))
-                {
-                    player.SetBan();
-                }
-            }
-
-            public void UnbanPlayer()
-            {
-                if (TryGetPlayer(out Player player))
-                {
-                    player.RemoveBan();
-                }
-            }
-
-            public bool TryGetPlayer(out Player player)
-            {
-                int id;
-                player = null;
-
-                Console.WriteLine("Введите уникальный ID игрока");
-                string userInput = Console.ReadLine().Trim();
-
-                if (int.TryParse(userInput, out id) == false)
+                if (int.TryParse(userInputLevelPlayer, out levelPlayer) == false)
                 {
                     Console.WriteLine("Не корректный ввод.");
                     Console.ReadKey();
                     return false;
                 }
+            }
 
-                for (int i = 0; i < _dataBases.Count; i++)
-                {
-                    if (id == _dataBases[i].Id)
-                    {
-                        player = _dataBases[i];
-                        return true;
-                    }
-                }
+            _players.Add(new Player(userInputNamePlayer, levelPlayer));
+            return true;
+        }
 
-                Console.WriteLine("Нет такого игрока.");
+
+        public void ShowAllPlayeres()
+        {
+            if (_players.Count < 1)
+            {
+                Console.WriteLine($"База данных пуста. Добавьте Игроков");
                 Console.ReadKey();
-                return false;
+            }
+            else
+            {
+                for (int i = 0; i < _players.Count; i++)
+                {
+                    _players[i].ShowInfo();
+                }
+            }
+
+            Console.ReadKey();
+        }
+
+        public void RemovePlayer()
+        {
+            if (TryGetPlayer(out Player player))
+            {
+                _players.Remove(player);
+                Console.WriteLine("Игрок с таким ID найден и удален.");
+                Console.ReadKey();
             }
         }
 
-        class Player
+        public void SetBanPlayer()
         {
-            private static int _ids;
-
-            public Player(string name, int level)
+            if (TryGetPlayer(out Player player))
             {
-                Id = ++_ids;
-                Name = name;
-                Level = level;
-                IsBanned = false;
+                player.SetBan();
             }
+        }
 
-            public int Id { get; private set; }
-            public string Name { get; private set; }
-            public int Level { get; private set; }
-            public bool IsBanned { get; private set; }
-
-            public void ShowInfo()
+        public void UnbanPlayer()
+        {
+            if (TryGetPlayer(out Player player))
             {
-                Console.WriteLine($"Уникальный Id Персонажа: {Id} Ник: {Name} Уровень: {Level}{(IsBanned ? " Забанен" : "")}");
+                player.Unban();
             }
+        }
 
-            public void SetBan()
+        private bool TryGetPlayer(out Player player)
+        {
+            int id;
+            player = null;
+
+            Console.WriteLine("Введите уникальный ID игрока");
+            string userInput = Console.ReadLine().Trim();
+
+            if (int.TryParse(userInput, out id) == false)
             {
-                IsBanned = true;
-                Console.WriteLine("Персонаж получил бан.");
+                Console.WriteLine("Не корректный ввод.");
                 Console.ReadKey();
+                return false;
             }
 
-            public void RemoveBan()
+            for (int i = 0; i < _players.Count; i++)
             {
-                IsBanned = false;
-                Console.WriteLine("С Персонажа снят бан.");
-                Console.ReadKey();
+                if (id == _players[i].Id)
+                {
+                    player = _players[i];
+                    return true;
+                }
             }
+
+            Console.WriteLine("Нет такого игрока.");
+            Console.ReadKey();
+            return false;
+        }
+    }
+
+    class Player
+    {
+        private static int _ids;
+
+        public Player(string name, int level)
+        {
+            Id = ++_ids;
+            Name = name;
+            Level = level;
+            IsBanned = false;
+        }
+
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public int Level { get; private set; }
+        public bool IsBanned { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Уникальный Id Персонажа: {Id} Ник: {Name} Уровень: {Level}{(IsBanned ? " Забанен" : "")}");
+        }
+
+        public void SetBan()
+        {
+            IsBanned = true;
+            Console.WriteLine("Персонаж получил бан.");
+            Console.ReadKey();
+        }
+
+        public void Unban()
+        {
+            IsBanned = false;
+            Console.WriteLine("С Персонажа снят бан.");
+            Console.ReadKey();
         }
     }
 }
